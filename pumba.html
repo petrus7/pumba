@@ -1,0 +1,57 @@
+<html>
+    <body>
+        <h2>Pumpa network latency simulation tool</h2>
+
+        <p>Pumba initiative github repository: https://github.com/alexei-led/pumba and author blog: https://alexei-led.github.io/post/pumba_docker_netem/</p>
+
+        <p>As mentioned on author blog pumba is based on Netflix Chaos Monkey(tool for killink and restoring virtual machines of living system to check its durability and resistance https://github.com/Netflix/SimianArmy/wiki/Chaos-Monkey). Pumba is messing up network settings using linux <i>netem</i> tool. It allows to simulate network latency, packages loss or timeouts within containers on single host or multiple hosts in network</p>
+
+        <h3>Installation</h3>
+        <p> There are two way of running pumba: 
+            <ul>
+                <li>download pumba binary and run it on host environment https://github.com/alexei-led/pumba/releases</li>
+                <li>use pumba docker container: https://hub.docker.com/r/gaiaadm/pumba/</li>
+            </ul>
+        </p>
+
+        <h3>Most basic usage</h3>
+        <p>
+            Run container which will perform ping operation for example: <i>docker run -it --rm --name tryme alpine sh -c "apk add --update iproute2 && ping www.example.com"</i>
+        </br>
+        Then run another container with pumba tool <i>docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock gaiaadm/pumba netem --interface eth0 --duration 1m delay --time 3000 tryme</i> It will add 3 second latency to tryme container
+        </p>
+
+
+        <h3>Loss packages simulation</h3>
+
+        <p> in this case we will use 3 containers: server, client, pumba.
+        <ul>
+            <li>client: docker run -it --rm --name tryme alpine sh -c "apk add --update iproute2 iperf && iperf -c 172.17.0.2 -u" set proper ip</li>
+            <li>server: docker run -it --rm --name tryme-srv alpine sh -c "apk add --update iperf && iperf -s -u -i 1"</li>
+            <li>pumba: docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock gaiaadm/pumba netem -d 1m loss -p 20 tryme - try me is container name </li>
+        </ul>
+        </p>
+
+        <h3>Pumba command list:</h3>
+        <ul>
+             <li>kill     kill specified containers</li>
+             <li>stop     stop containers</li>
+             <li>pause    pause all processes</li>
+             <li>rm       remove containers</li>
+             <li>netem    emulate the properties of wide area networks</li>
+             <li>help, h  Shows a list of commands or help for one command</li>
+        </ul>
+
+
+        <h3>Netem commands</h3>
+        <ul>
+             <li>delay         delay egress traffic</li>
+             <li>loss          adds packet losses</li>
+             <li>loss-state    adds packet losses, based on 4-state Markov probability model</li>
+             <li>loss-gemodel  adds packet losses, according to the Gilbert-Elliot loss model</li>
+             <li>rate          rate limit egress traffic</li>
+             <li>duplicate     adds packet duplication</li>
+             <li>corrupt       adds packet corruption</li>
+        </ul>
+    </body>
+<html>
